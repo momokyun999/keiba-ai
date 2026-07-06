@@ -510,9 +510,10 @@ class FeatureBuilder:
 # ===================================================
 class Predictor:
     def __init__(self, model_dir):
-        with open(model_dir + "model_live.pkl", "rb") as f:
+        # 実力モード：オッズに依存しないモデルを常用する
+        with open(model_dir + "model_no_odds.pkl", "rb") as f:
             self.model = pickle.load(f)
-        with open(model_dir + "features_live.pkl", "rb") as f:
+        with open(model_dir + "features_no_odds.pkl", "rb") as f:
             self.features = pickle.load(f)
         # 穴狙いモデル（オッズなし）。無くても動くようtry
         try:
@@ -535,9 +536,10 @@ class Predictor:
             df["popularity"] = df["number_num"]
 
         X = df[self.features].copy()
-        X["odds"] = pd.to_numeric(X["odds"], errors="coerce").fillna(
-            X["odds"].median() if "odds" in X else 1.0
-        )
+        if "odds" in self.features:
+            X["odds"] = pd.to_numeric(X["odds"], errors="coerce").fillna(
+                X["odds"].median() if "odds" in X else 1.0
+            )
 
         proba = self.model.predict_proba(X)[:, 1]
         df["win_prob"] = proba

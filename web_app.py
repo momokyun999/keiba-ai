@@ -708,6 +708,8 @@ def page_predict():
     with col_btn:
         run = st.button("予想する", type="primary", use_container_width=True)
 
+    st.caption("🔒 実力モードで予測中（オッズ非依存）")
+
     if run:
         if not race_id:
             st.error("race_id を入力してください。")
